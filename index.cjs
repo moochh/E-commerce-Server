@@ -254,12 +254,17 @@ app.post('/webhook', async (req, res) => {
 	const type = req.body.data.attributes.type;
 
 	if (type == 'checkout_session.payment.paid') {
-		res.status(200).json({ message: 'Payment successful!' });
-
 		const query = 'INSERT INTO payments (name) VALUES ($1)';
 		const values = ['kim clores'];
 
-		await client.query(query, values);
+		try {
+			await client.query(query, values);
+		} catch (error) {
+			res.status(500).json({ error: error.stack });
+		}
+
+		res.status(200).json({ message: 'Payment successful!' });
+
 		return;
 	}
 
