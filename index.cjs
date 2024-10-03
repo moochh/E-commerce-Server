@@ -267,6 +267,10 @@ app.post('/webhook', (req, res) => {
 			console.log('Payment is processing:', event.data);
 			// Handle processing state
 			break;
+		case 'checkout_session.payment.paid':
+			console.log('Checkout session payment succeeded:', event.data);
+			// Process the successful payment
+			break;
 		default:
 			console.log('Unhandled event type:', event.type);
 	}
