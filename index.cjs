@@ -253,6 +253,8 @@ app.delete('/cart/:user_id', async (req, res) => {
 app.post('/webhook', (req, res) => {
 	const event = req.body;
 
+	console.log(event);
+
 	// Handle the event based on its type
 	switch (event.type) {
 		case 'payment.paid':
