@@ -251,34 +251,14 @@ app.delete('/cart/:user_id', async (req, res) => {
 
 /// WEBHOOK                                                                                                                    ///
 app.post('/webhook', (req, res) => {
-	const event = req.body;
+	const type = req.body.data.attributes.type;
 
-	console.log(event);
-
-	// Handle the event based on its type
-	switch (event.type) {
-		case 'payment.paid':
-			console.log('Payment succeeded:', event.data);
-			// Process the successful payment
-			break;
-		case 'payment.failed':
-			console.log('Payment failed:', event.data);
-			// Handle the failed payment
-			break;
-		case 'payment.processing':
-			console.log('Payment is processing:', event.data);
-			// Handle processing state
-			break;
-		case 'checkout_session.payment.paid':
-			console.log('Checkout session payment succeeded:', event.data);
-			// Process the successful payment
-			break;
-		default:
-			console.log('Unhandled event type:', event.type);
+	if (type == 'checkout_session.payment.paid') {
+		res.status(200).json({ message: 'Payment successful!' });
+		return;
 	}
 
-	// Acknowledge receipt of the event
-	res.status(200).json(event.data);
+	res.status(400).json({ message: 'Invalid event type!' });
 });
 
 /// RUN                                                                                                                        ///
