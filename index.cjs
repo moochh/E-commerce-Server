@@ -253,7 +253,7 @@ app.delete('/cart/:user_id', async (req, res) => {
 app.post('/webhook', async (req, res) => {
 	const type = req.body.data.attributes.type;
 
-	console.log(req.body);
+	console.log(req.body.data.data);
 
 	if (type == 'checkout_session.payment.paid') {
 		const query = 'INSERT INTO payments (name) VALUES ($1)';
