@@ -249,6 +249,32 @@ app.delete('/cart/:user_id', async (req, res) => {
 	}
 });
 
+/// WEBHOOK                                                                                                                    ///
+app.post('/webhook', (req, res) => {
+	const event = req.body;
+
+	// Handle the event based on its type
+	switch (event.type) {
+		case 'payment.paid':
+			console.log('Payment succeeded:', event.data);
+			// Process the successful payment
+			break;
+		case 'payment.failed':
+			console.log('Payment failed:', event.data);
+			// Handle the failed payment
+			break;
+		case 'payment.processing':
+			console.log('Payment is processing:', event.data);
+			// Handle processing state
+			break;
+		default:
+			console.log('Unhandled event type:', event.type);
+	}
+
+	// Acknowledge receipt of the event
+	res.status(200).json(event.data);
+});
+
 /// RUN                                                                                                                        ///
 app.get('/', (req, res) => {
 	res.send('Server running...');
