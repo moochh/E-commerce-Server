@@ -290,14 +290,18 @@ app.post('/webhook', async (req, res) => {
 			const values = [user_id, payment_intent_id, payment_id];
 			await client.query(query, values);
 
+			console.log('Payment successful!');
 			res.status(200).json({ message: 'Payment successful!' });
 		} catch (error) {
+			console.log('Payment error!');
 			res.status(500).json({ error: error.stack });
 		}
 	} else if (type == 'payment.failed') {
+		console.log('Payment failed!');
 		res.status(409).json({ message: 'Payment failed!' });
 	}
 
+	console.log('Invalid event type!');
 	res.status(400).json({ message: 'Invalid event type!' });
 });
 
