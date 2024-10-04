@@ -96,6 +96,7 @@ app.get('/products', async (req, res) => {
 
 	try {
 		const result = await client.query(query);
+		console.log(result);
 		res.status(200).json(result.rows);
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
