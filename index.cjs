@@ -275,7 +275,7 @@ app.post('/webhook', async (req, res) => {
 	const type = req.body.data.attributes.type;
 	console.log(req.body.data.attributes);
 
-	if (type == 'checkout_session.payment.paid' || type == 'payment.paid') {
+	if (type == 'payment.paid') {
 		const query = 'INSERT INTO payments (name) VALUES ($1)';
 		const values = ['kim clores'];
 
