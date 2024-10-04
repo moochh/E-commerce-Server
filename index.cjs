@@ -252,10 +252,9 @@ app.delete('/cart/:user_id', async (req, res) => {
 /// WEBHOOK                                                                                                                    ///
 app.post('/webhook', async (req, res) => {
 	const type = req.body.data.attributes.type;
+	console.log(req.body.data.attributes);
 
-	console.log(type);
-
-	if (type == 'checkout_session.payment.paid') {
+	if (type == 'checkout_session.payment.paid' || type == 'payment.paid') {
 		const query = 'INSERT INTO payments (name) VALUES ($1)';
 		const values = ['kim clores'];
 
@@ -268,6 +267,8 @@ app.post('/webhook', async (req, res) => {
 		res.status(200).json({ message: 'Payment successful!' });
 
 		return;
+	} else if (type == 'payment.failed') {
+		res.status(409).json({ message: 'Payment failed!' });
 	}
 
 	res.status(400).json({ message: 'Invalid event type!' });
