@@ -273,10 +273,9 @@ app.post('/payment-intents', async (req, res) => {
 /// WEBHOOK                                                                                                                    ///
 app.post('/webhook', async (req, res) => {
 	const type = req.body.data.attributes.type;
-	const payment_intent_id = req.body.data.attributes.payment_intent_id;
-	const payment_id = req.body.data.id;
-
-	console.log(req.body.data);
+	const payment_intent_id =
+		req.body.data.attributes.data.attributes.payment_intent_id;
+	const payment_id = req.body.data.attributes.data.id;
 
 	console.log(type, payment_intent_id, payment_id);
 
