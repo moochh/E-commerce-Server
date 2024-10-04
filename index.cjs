@@ -250,6 +250,28 @@ app.delete('/cart/:user_id', async (req, res) => {
 	}
 });
 
+/// FAVORITES                                                                                                                  ///
+//> Add
+app.post('/favorites/:user_id', async (req, res) => {
+	const { user_id } = req.params;
+	const { product_id } = req.body;
+
+	if (!user_id || !product_id) {
+		return res.status(400).json({ error: 'Missing required fields!' });
+	}
+
+	try {
+		const query = 'INSERT INTO favorites (user_id, product_id) VALUES ($1, $2)';
+		const values = [user_id, product_id];
+
+		await client.query(query, values);
+
+		res.status(201).json({ message: 'Product added to favorites!' });
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
 /// PAYMENT INTENTS                                                                                                            ///
 app.post('/payment-intents', async (req, res) => {
 	const { user_id, payment_intent_id } = req.body;
