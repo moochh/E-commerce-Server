@@ -277,8 +277,6 @@ app.post('/webhook', async (req, res) => {
 		req.body.data.attributes.data.attributes.payment_intent_id;
 	const payment_id = req.body.data.attributes.data.id;
 
-	console.log(type, payment_intent_id, payment_id);
-
 	if (type == 'payment.paid') {
 		const searchQuery =
 			'SELECT user_id FROM payment_intents WHERE payment_intent_id = $1';
@@ -286,8 +284,6 @@ app.post('/webhook', async (req, res) => {
 
 		try {
 			const searchResult = await client.query(searchQuery, searchValues);
-			console.log(searchResult);
-
 			const user_id = searchResult.rows[0].user_id;
 
 			const query =
@@ -295,8 +291,6 @@ app.post('/webhook', async (req, res) => {
 			const values = [user_id, payment_intent_id, payment_id];
 
 			await client.query(query, values);
-
-			console.log(user_id);
 
 			console.log('Payment successful!');
 			res.status(200).json({ message: 'Payment successful!' });
