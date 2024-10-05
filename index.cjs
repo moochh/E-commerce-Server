@@ -7,6 +7,7 @@ const { Client } = require('pg');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const uuid = require('uuid');
+const argon = require('argon2');
 
 /// SETUP                                                                                                                      ///
 app.use(cors());
@@ -42,13 +43,24 @@ app.get('/users', async (req, res) => {
 app.post('/login', async (req, res) => {
 	const { email, password } = req.body;
 
-	const query = 'SELECT * FROM users WHERE email = $1 AND password = $2';
-	const values = [email, password];
+	if (!email || !password) {
+		return res.status(400).json({ error: 'Missing required fields!' });
+	}
+
+	const query = 'SELECT password_hash FROM users WHERE email = $1';
+	const values = [email];
 
 	try {
 		const { rows } = await client.query(query, values);
 
 		if (!rows.length) {
+			return res.status(401).json({ error: 'Invalid email or password!' });
+		}
+
+		const password_hash = rows[0].password_hash;
+		const isPasswordCorrect = await argon.verify(password_hash, password);
+
+		if (!isPasswordCorrect) {
 			return res.status(401).json({ error: 'Invalid email or password!' });
 		}
 
