@@ -15,6 +15,7 @@ const path = require('path');
 app.use(cors());
 app.use(bodyParser.json());
 
+//> POSTGRESQL
 const client = new Client({
 	user: process.env.POSTGRES_USER,
 	host: process.env.POSTGRES_HOST,
@@ -30,6 +31,19 @@ client
 	.connect()
 	.then(() => console.log('Connected to PostgreSQL'))
 	.catch((err) => console.error('Connection error', err.stack));
+
+//> Firebase
+const serviceAccount = require(path.join(
+	__dirname,
+	'./serviceAccountKey.json'
+));
+
+fbAdmin.initializeApp({
+	credential: fbAdmin.credential.cert(serviceAccount),
+	storageBucket: 'prof-elec-b8dce.appspot.com'
+});
+
+const bucket = fbAdmin.storage().bucket();
 
 /// GET USERS                                                                                                                  ///
 app.get('/users', async (req, res) => {
@@ -414,7 +428,7 @@ app.post('/webhook', async (req, res) => {
 });
 
 /// IMAGE TEST                                                                                                                 ///
-app.post('/image-test', upload.single('image'), (req, res) => {
+app.post('/image-test', (req, res) => {
 	const { image } = req.file;
 
 	if (image) {
