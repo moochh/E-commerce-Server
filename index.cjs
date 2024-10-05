@@ -8,9 +8,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const uuid = require('uuid');
 const argon = require('argon2');
-const path = require('path');
-const firebase = require('firebase');
-require('firebase/storage');
+const firebase = require('firebase/app');
+const { getStorage, put } = require('firebase/storage');
 
 /// SETUP                                                                                                                      ///
 app.use(cors());
@@ -45,7 +44,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 
-const storage = firebase.storage();
+const storage = getStorage();
 
 /// GET USERS                                                                                                                  ///
 app.get('/users', async (req, res) => {
