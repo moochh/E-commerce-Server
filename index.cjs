@@ -104,7 +104,7 @@ app.post('/register', async (req, res) => {
 
 /// PRODUCTS                                                                                                                   ///
 app.get('/products', async (req, res) => {
-	const query = 'SELECT * FROM products';
+	const query = 'SELECT * FROM products WHERE is_visible = true';
 
 	try {
 		const result = await client.query(query);
@@ -136,9 +136,27 @@ app.get('/products/:id', async (req, res) => {
 
 //> New Product
 app.post('/products', async (req, res) => {
-	const { name, description, category, price, stock_quantity } = req.body;
+	const {
+		name,
+		description,
+		category,
+		price,
+		stock_quantity,
+		brand,
+		dimensions,
+		type
+	} = req.body;
 
-	if (!name || !description || !category || !price || !stock_quantity) {
+	if (
+		!name ||
+		!description ||
+		!category ||
+		!price ||
+		!stock_quantity ||
+		!brand ||
+		!dimensions ||
+		!type
+	) {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
 
@@ -157,8 +175,17 @@ app.post('/products', async (req, res) => {
 	}
 
 	try {
-		const query = `INSERT INTO products (name, description, category, price, stock_quantity) VALUES ($1, $2, $3, $4, $5)`;
-		const values = [name, description, category, price, stock_quantity];
+		const query = `INSERT INTO products (name, description, category, price, stock_quantity, brand, dimensions, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
+		const values = [
+			name,
+			description,
+			category,
+			price,
+			stock_quantity,
+			brand,
+			dimensions,
+			type
+		];
 
 		await client.query(query, values);
 
