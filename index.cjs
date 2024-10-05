@@ -429,7 +429,7 @@ app.post('/webhook', async (req, res) => {
 });
 
 /// IMAGE TEST                                                                                                                 ///
-app.post('/image-test', async (req, res) => {
+app.post('/image-test', upload.single('image'), async (req, res) => {
 	const { image } = req.file;
 
 	if (image) {
