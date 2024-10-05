@@ -8,8 +8,9 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const uuid = require('uuid');
 const argon = require('argon2');
-const fbAdmin = require('firebase-admin');
 const path = require('path');
+const firebase = require('firebase');
+require('firebase/storage');
 
 /// SETUP                                                                                                                      ///
 app.use(cors());
@@ -33,17 +34,18 @@ client
 	.catch((err) => console.error('Connection error', err.stack));
 
 //> Firebase
-const serviceAccount = require(path.join(
-	__dirname,
-	'./serviceAccountKey.json'
-));
+const firebaseConfig = {
+	apiKey: process.env.FIREBASE_API_KEY,
+	authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+	projectId: process.env.FIREBASE_PROJECT_ID,
+	storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+	messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+	appId: process.env.FIREBASE_APP_ID
+};
 
-fbAdmin.initializeApp({
-	credential: fbAdmin.credential.cert(serviceAccount),
-	storageBucket: 'prof-elec-b8dce.appspot.com'
-});
+firebase.initializeApp(firebaseConfig);
 
-const bucket = fbAdmin.storage().bucket();
+const storage = firebase.storage();
 
 /// GET USERS                                                                                                                  ///
 app.get('/users', async (req, res) => {
@@ -428,11 +430,24 @@ app.post('/webhook', async (req, res) => {
 });
 
 /// IMAGE TEST                                                                                                                 ///
-app.post('/image-test', (req, res) => {
+app.post('/image-test', async (req, res) => {
 	const { image } = req.file;
 
 	if (image) {
-		res.status(201).json({ message: 'Image uploaded successfully!' });
+		const storageRef = storage.ref(`products/${file.name}`);
+
+		try {
+			await storageRef.put(file);
+
+			// Get the download URL
+			const url = await storageRef.getDownloadURL();
+
+			// Send the URL to the client
+			res.status(201).json({ message: 'Image uploaded successfully!', url });
+		} catch (error) {
+			res.status(500).json({ error: error.stack });
+			console.error(error);
+		}
 	} else {
 		res.status(400).json({ error: 'Missing required fields!' });
 	}
