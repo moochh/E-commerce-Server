@@ -411,6 +411,17 @@ app.post('/webhook', async (req, res) => {
 	res.status(500).json({ message: 'Unknown error occurred!' });
 });
 
+/// IMAGE TEST                                                                                                                 ///
+app.post('/image-test', (req, res) => {
+	const { image } = req.body;
+
+	if (image) {
+		res.status(201).json({ message: 'Image uploaded successfully!' });
+	} else {
+		res.status(400).json({ error: 'Missing required fields!' });
+	}
+});
+
 /// RUN                                                                                                                        ///
 app.get('/', (req, res) => {
 	res.send('Server running...');
