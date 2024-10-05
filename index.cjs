@@ -8,6 +8,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const uuid = require('uuid');
 const argon = require('argon2');
+const fbAdmin = require('firebase-admin');
+const path = require('path');
 
 /// SETUP                                                                                                                      ///
 app.use(cors());
@@ -412,7 +414,7 @@ app.post('/webhook', async (req, res) => {
 });
 
 /// IMAGE TEST                                                                                                                 ///
-app.post('/image-test', (req, res) => {
+app.post('/image-test', upload.single('image'), (req, res) => {
 	const { image } = req.file;
 
 	if (image) {
