@@ -413,7 +413,7 @@ app.post('/webhook', async (req, res) => {
 
 /// IMAGE TEST                                                                                                                 ///
 app.post('/image-test', (req, res) => {
-	const { image } = req.body;
+	const { image } = req.file;
 
 	if (image) {
 		res.status(201).json({ message: 'Image uploaded successfully!' });
