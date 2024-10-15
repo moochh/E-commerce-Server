@@ -11,7 +11,16 @@ router.get('/favorites/:user_id', async (req, res) => {
 
 	try {
 		const result = await client.query(query, values);
-		res.status(200).json(result.rows);
+
+		// Get product_id only
+		const product_ids = result.rows.map((row) => row.product_id);
+
+		const productsQuery = 'SELECT * FROM products WHERE id = ANY($1)';
+		const productsValues = [product_ids];
+
+		const productsResult = await client.query(productsQuery, productsValues);
+
+		res.json(productsResult.rows);
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 	}

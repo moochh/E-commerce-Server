@@ -76,7 +76,8 @@ router.get('/products/:id', async (req, res) => {
 router.post('/products', upload.single('image'), async (req, res) => {
 	const {
 		name,
-		description,
+		short_description,
+		long_description,
 		category,
 		price,
 		stock_quantity,
@@ -89,13 +90,14 @@ router.post('/products', upload.single('image'), async (req, res) => {
 
 	if (
 		!name ||
-		!description ||
 		!category ||
 		!price ||
 		!stock_quantity ||
 		!brand ||
 		!dimensions ||
-		!type
+		!type ||
+		!short_description ||
+		!long_description
 	) {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
@@ -119,10 +121,11 @@ router.post('/products', upload.single('image'), async (req, res) => {
 	}
 
 	try {
-		const query = `INSERT INTO products (name, description, category, price, stock_quantity, brand, dimensions, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`;
+		const query = `INSERT INTO products (name, short_description, long_description, category, price, stock_quantity, brand, dimensions, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`;
 		const values = [
 			name,
-			description,
+			short_description,
+			long_description,
 			category,
 			price,
 			stock_quantity,
@@ -149,6 +152,16 @@ async function uploadImage(image, id) {
 	const fileBuffer = fs.readFileSync(image.path);
 
 	await uploadBytes(storageRef, fileBuffer, { contentType: image.mimetype });
+	const url = await getDownloadURL(storageRef);
+
+	const query = `UPDATE products SET image_url = $1 WHERE id = $2`;
+	const values = [url, id];
+
+	try {
+		await client.query(query, values);
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
 
 	fs.unlinkSync(image.path);
 }
@@ -162,6 +175,38 @@ router.delete('/products/:id', async (req, res) => {
 	try {
 		await client.query(query, values);
 		res.status(200).json({ message: 'Product deleted!' });
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
+//> Product Types
+router.get('/product-types', async (req, res) => {
+	const query = 'SELECT * FROM products';
+	const categories = [
+		'Living Room',
+		'Kitchen',
+		'Dining Room',
+		'Bedroom',
+		'Bathroom',
+		'Outdoor'
+	];
+
+	try {
+		const types = new Object();
+
+		// Get types for each category
+		for (const category of categories) {
+			const categoryQuery = `SELECT DISTINCT type FROM products WHERE category = $1`;
+			const categoryValues = [category];
+
+			const categoryResult = await client.query(categoryQuery, categoryValues);
+			const categoryTypes = categoryResult.rows.map((item) => item.type);
+
+			types[category] = categoryTypes;
+		}
+
+		res.status(200).json(types);
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 	}

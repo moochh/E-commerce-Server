@@ -13,6 +13,9 @@ const favoritesRoutes = require('./routes/favoritesRoutes.cjs');
 const paymentsRoutes = require('./routes/paymentsRoutes.cjs');
 const webhookRoutes = require('./routes/webhookRoutes.cjs');
 const productsRoutes = require('./routes/productsRoutes.cjs');
+const ordersRoutes = require('./routes/ordersRoutes.cjs');
+const billingRoutes = require('./routes/billingRoutes.cjs');
+const featuredRoutes = require('./routes/featuredRoutes.cjs');
 
 /// SETUP                                                                                                                      ///
 app.use(cors());
@@ -25,6 +28,9 @@ app.use('/', favoritesRoutes);
 app.use('/', paymentsRoutes);
 app.use('/', webhookRoutes);
 app.use('/', productsRoutes);
+app.use('/', ordersRoutes);
+app.use('/', billingRoutes);
+app.use('/', featuredRoutes);
 
 /// RUN                                                                                                                        ///
 app.get('/', (req, res) => {

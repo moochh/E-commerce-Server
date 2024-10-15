@@ -6,14 +6,47 @@ const client = require('../services.cjs');
 //> Get
 router.get('/cart/:user_id', async (req, res) => {
 	const { user_id } = req.params;
-	const query = 'SELECT * FROM cart WHERE user_id = $1';
-	const values = [user_id];
+
+	// Query to get product IDs and quantities from the cart
+	const cartQuery = 'SELECT product_id, quantity FROM cart WHERE user_id = $1';
+	const cartValues = [user_id];
 
 	try {
-		const result = await client.query(query, values);
-		res.status(200).json(result.rows);
+		// Fetch product IDs and quantities from the cart
+		const cartResult = await client.query(cartQuery, cartValues);
+		const cartItems = cartResult.rows;
+
+		if (cartItems.length === 0) {
+			return res.status(200).json([]);
+		}
+
+		// Extract the product IDs
+		const productIds = cartItems.map((item) => parseInt(item.product_id));
+
+		// Query to get product info from the products table for these product IDs
+		const productQuery = 'SELECT * FROM products WHERE id = ANY($1)';
+		const productValues = [productIds];
+
+		// Fetch product info for the selected products
+		const productResult = await client.query(productQuery, productValues);
+		const products = productResult.rows;
+
+		// Combine product info with quantities
+		const cartWithProductInfo = cartItems.map((cartItem) => {
+			const product = products.find(
+				(p) => p.id === parseInt(cartItem.product_id)
+			);
+			return {
+				...product,
+				quantity: parseInt(cartItem.quantity)
+			};
+		});
+
+		// Send the combined data
+		res.status(200).json(cartWithProductInfo);
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
+		console.error(error);
 	}
 });
 
