@@ -212,4 +212,25 @@ router.get('/product-types', async (req, res) => {
 	}
 });
 
+//! DELETE ALL
+router.delete('/delete-all/:product_id', async (req, res) => {
+	const { product_id } = req.params;
+	const deleteValues = [product_id];
+
+	// Delete from tables cart, favorites, order_products
+	const cartQuery = `DELETE FROM cart WHERE product_id = $1`;
+	const favoritesQuery = `DELETE FROM favorites WHERE product_id = $1`;
+	const orderProductsQuery = `DELETE FROM order_products WHERE product_id = $1`;
+
+	try {
+		await client.query(cartQuery, deleteValues);
+		await client.query(favoritesQuery, deleteValues);
+		await client.query(orderProductsQuery, deleteValues);
+
+		res.status(200).json({ message: 'Product deleted!' });
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
 module.exports = router;
