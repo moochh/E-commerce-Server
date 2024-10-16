@@ -22,7 +22,7 @@ router.post('/login', async (req, res) => {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
 
-	const query = 'SELECT password_hash FROM users WHERE email = $1';
+	const query = 'SELECT id, password_hash FROM users WHERE email = $1';
 	const values = [email];
 
 	try {
@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
 			return res.status(401).json({ error: 'Invalid email or password!' });
 		}
 
-		res.status(200).json({ message: 'Login successful!' });
+		res.status(200).json({ id: rows[0].id });
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 	}
