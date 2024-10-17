@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const client = require('../services.cjs');
+const { client } = require('../services.cjs');
 
 /// ORDERS
 //> Get

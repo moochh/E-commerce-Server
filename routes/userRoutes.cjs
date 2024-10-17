@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const client = require('../services.cjs');
+const { client } = require('../services.cjs');
 const uuid = require('uuid');
 const argon = require('argon2');
 
@@ -74,6 +74,7 @@ router.post('/register', async (req, res) => {
 		res.status(201).json({ message: 'Registration successful!' });
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
+		console.log(error.stack);
 	}
 });
 
