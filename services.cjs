@@ -18,4 +18,14 @@ client
 	.then(() => console.log('Connected to PostgreSQL'))
 	.catch((err) => console.error('Connection error', err.stack));
 
-module.exports = client;
+const validateRequiredFields = (data, requiredFields) => {
+	const missingFields = requiredFields.filter((field) => !data[field]);
+
+	if (missingFields.length > 0) {
+		return `Missing ${missingFields.join(', ')}!`;
+	}
+
+	return null; // No missing fields
+};
+
+module.exports = { client, validateRequiredFields };

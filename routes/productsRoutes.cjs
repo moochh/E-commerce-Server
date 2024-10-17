@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const client = require('../services.cjs');
+const { client, validateRequiredFields } = require('../services.cjs');
 const firebase = require('firebase/app');
 const {
 	getStorage,
@@ -72,8 +72,28 @@ router.get('/products/:id', async (req, res) => {
 	}
 });
 
+//> Set Product Image
+router.put('/product-image', async (req, res) => {
+	const { product_id, image_url } = req.body;
+
+	const requiredFields = ['product_id', 'image_url'];
+
+	const validationError = validateRequiredFields(req.body, requiredFields);
+	if (validationError) return res.status(400).json({ error: validationError });
+
+	const query = `UPDATE products SET image_url = $1 WHERE id = $2`;
+	const values = [image_url, product_id];
+
+	try {
+		await client.query(query, values);
+		res.status(200).json({ message: 'Product image updated!' });
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
 //> New Product
-router.post('/products', upload.single('image'), async (req, res) => {
+router.post('/products', async (req, res) => {
 	const {
 		name,
 		short_description,
@@ -86,25 +106,20 @@ router.post('/products', upload.single('image'), async (req, res) => {
 		type
 	} = req.body;
 
-	const image = req.file;
+	const requiredFields = [
+		'name',
+		'short_description',
+		'long_description',
+		'category',
+		'price',
+		'stock_quantity',
+		'brand',
+		'dimensions',
+		'type'
+	];
 
-	if (
-		!name ||
-		!category ||
-		!price ||
-		!stock_quantity ||
-		!brand ||
-		!dimensions ||
-		!type ||
-		!short_description ||
-		!long_description
-	) {
-		return res.status(400).json({ error: 'Missing required fields!' });
-	}
-
-	if (!image) {
-		return res.status(400).json({ error: 'No image uploaded!' });
-	}
+	const validationError = validateRequiredFields(req.body, requiredFields);
+	if (validationError) return res.status(400).json({ error: validationError });
 
 	// Check existing product name
 	const selectQuery = 'SELECT * FROM products WHERE name = $1';
@@ -137,10 +152,9 @@ router.post('/products', upload.single('image'), async (req, res) => {
 		const result = await client.query(query, values);
 		const newProductId = result.rows[0].id;
 
-		// Upload image
-		await uploadImage(image, newProductId);
-
-		res.status(201).json({ message: 'Product created!' });
+		res
+			.status(201)
+			.json({ message: 'Product created!', product_id: newProductId });
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 	}
