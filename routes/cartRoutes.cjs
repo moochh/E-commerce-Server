@@ -59,7 +59,18 @@ router.post('/cart/:user_id', async (req, res) => {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
 
+	// Check if product is already in cart
+	const cartQuery = 'SELECT * FROM cart WHERE user_id = $1 AND product_id = $2';
+	const cartValues = [user_id, product_id];
+
 	try {
+		const cartResult = await client.query(cartQuery, cartValues);
+		const cartItems = cartResult.rows;
+
+		if (cartItems.length > 0) {
+			return res.status(400).json({ error: 'Product already in cart!' });
+		}
+
 		const query =
 			'INSERT INTO cart (user_id, product_id, quantity) VALUES ($1, $2, $3)';
 		const values = [user_id, product_id, 1];
@@ -81,7 +92,17 @@ router.put('/cart/:user_id', async (req, res) => {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
 
+	const cartQuery = 'SELECT * FROM cart WHERE user_id = $1 AND product_id = $2';
+	const cartValues = [user_id, product_id];
+
 	try {
+		const cartResult = await client.query(cartQuery, cartValues);
+		const cartItems = cartResult.rows;
+
+		if (cartItems.length === 0) {
+			return res.status(400).json({ error: 'Product not in cart!' });
+		}
+
 		const query =
 			'UPDATE cart SET quantity = $3 WHERE user_id = $1 AND product_id = $2';
 		const values = [user_id, product_id, quantity];
@@ -103,7 +124,18 @@ router.delete('/cart/:user_id', async (req, res) => {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
 
+	// Check if product is in cart
+	const cartQuery = 'SELECT * FROM cart WHERE user_id = $1 AND product_id = $2';
+	const cartValues = [user_id, product_id];
+
 	try {
+		const cartResult = await client.query(cartQuery, cartValues);
+		const cartItems = cartResult.rows;
+
+		if (cartItems.length === 0) {
+			return res.status(400).json({ error: 'Product not in cart!' });
+		}
+
 		const query = 'DELETE FROM cart WHERE user_id = $1 AND product_id = $2';
 		const values = [user_id, product_id];
 
