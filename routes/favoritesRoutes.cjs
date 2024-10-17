@@ -35,7 +35,18 @@ router.post('/favorites/:user_id', async (req, res) => {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
 
+	// Check if product is in favorites
+	const favoritesQuery =
+		'SELECT * FROM favorites WHERE user_id = $1 AND product_id = $2';
+	const favoritesValues = [user_id, product_id];
+
 	try {
+		const favoritesResult = await client.query(favoritesQuery, favoritesValues);
+
+		if (favoritesResult.rows.length > 0) {
+			return res.status(400).json({ error: 'Product already in favorites!' });
+		}
+
 		const query = 'INSERT INTO favorites (user_id, product_id) VALUES ($1, $2)';
 		const values = [user_id, product_id];
 
@@ -56,7 +67,17 @@ router.delete('/favorites/:user_id', async (req, res) => {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
 
+	const favoritesQuery =
+		'SELECT * FROM favorites WHERE user_id = $1 AND product_id = $2';
+	const favoritesValues = [user_id, product_id];
+
 	try {
+		const favoritesResult = await client.query(favoritesQuery, favoritesValues);
+
+		if (favoritesResult.rows.length === 0) {
+			return res.status(400).json({ error: 'Product not in favorites!' });
+		}
+
 		const query =
 			'DELETE FROM favorites WHERE user_id = $1 AND product_id = $2';
 		const values = [user_id, product_id];
