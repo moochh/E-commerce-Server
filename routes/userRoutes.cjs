@@ -66,15 +66,35 @@ router.post('/register', async (req, res) => {
 
 		// Insert to database
 		const id = uuid.v4();
-		const insertQuery = `INSERT INTO users (id, first_name, last_name, email, password) VALUES ($1, $2, $3, $4, $5)`;
-		const insertValues = [id, first_name, last_name, email, password];
+		const passwordHash = await argon.hash(password);
+		const insertQuery = `INSERT INTO users (id, first_name, last_name, email, password_hash) VALUES ($1, $2, $3, $4, $5) RETURNING id`;
+		const insertValues = [id, first_name, last_name, email, passwordHash];
 
-		await client.query(insertQuery, insertValues);
+		const result = await client.query(insertQuery, insertValues);
 
-		res.status(201).json({ message: 'Registration successful!' });
+		res
+			.status(201)
+			.json({ message: 'Registration successful!', id: result.rows[0].id });
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 		console.log(error.stack);
+	}
+});
+
+router.delete('/users/:email', async (req, res) => {
+	const email = req.params.email;
+
+	if (!email) return res.status(400).json({ message: 'Email is required!' });
+
+	try {
+		const deleteQuery = `DELETE FROM users WHERE email = $1`;
+		const deleteValues = [email];
+
+		await client.query(deleteQuery, deleteValues);
+
+		res.status(200).json({ message: 'User deleted!' });
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
 	}
 });
 

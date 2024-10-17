@@ -53,16 +53,16 @@ router.get('/cart/:user_id', async (req, res) => {
 //> Add
 router.post('/cart/:user_id', async (req, res) => {
 	const { user_id } = req.params;
-	const { product_id, quantity } = req.body;
+	const { product_id } = req.body;
 
-	if (!user_id || !product_id || !quantity) {
+	if (!user_id || !product_id) {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
 
 	try {
 		const query =
 			'INSERT INTO cart (user_id, product_id, quantity) VALUES ($1, $2, $3)';
-		const values = [user_id, product_id, quantity];
+		const values = [user_id, product_id, 1];
 
 		await client.query(query, values);
 
