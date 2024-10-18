@@ -146,4 +146,23 @@ router.delete('/cart/:user_id/:product_id', async (req, res) => {
 	}
 });
 
+//> Clear
+router.delete('/cart-clear/:user_id', async (req, res) => {
+	const { user_id } = req.params;
+
+	if (!user_id) {
+		return res.status(400).json({ error: 'Missing required fields!' });
+	}
+
+	const query = 'DELETE FROM cart WHERE user_id = $1';
+	const values = [user_id];
+
+	try {
+		await client.query(query, values);
+		res.status(200).json({ message: 'Cart cleared!' });
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
 module.exports = router;
