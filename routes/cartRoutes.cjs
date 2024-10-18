@@ -116,9 +116,8 @@ router.put('/cart/:user_id', async (req, res) => {
 });
 
 //> Remove
-router.delete('/cart/:user_id', async (req, res) => {
-	const { user_id } = req.params;
-	const { product_id } = req.body;
+router.delete('/cart/:user_id/:product_id', async (req, res) => {
+	const { user_id, product_id } = req.params;
 
 	if (!user_id || !product_id) {
 		return res.status(400).json({ error: 'Missing required fields!' });
