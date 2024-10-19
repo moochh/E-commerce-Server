@@ -196,7 +196,6 @@ router.delete('/products/:id', async (req, res) => {
 
 //> Product Types
 router.get('/product-types', async (req, res) => {
-	const query = 'SELECT * FROM products';
 	const categories = [
 		'Living Room',
 		'Kitchen',
@@ -219,11 +218,11 @@ router.get('/product-types', async (req, res) => {
 			const categoryTypes = categoryResult.rows.map((item) => item.type);
 
 			types[category] = categoryTypes;
-			types['All'] = [[...types.All, ...categoryTypes]];
+			types['All'] = [...types.All, ...categoryTypes];
 		}
 
 		// Query to get types of featured products
-		const featuredQuery = `SELECT DISTINCT type FROM products WHERE "IsFeatured" = true`;
+		const featuredQuery = `SELECT DISTINCT type FROM products WHERE "is_featured" = true`;
 		const featuredResult = await client.query(featuredQuery);
 
 		// Extract featured types
