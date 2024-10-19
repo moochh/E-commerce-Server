@@ -208,6 +208,7 @@ router.get('/product-types', async (req, res) => {
 
 	try {
 		const types = new Object();
+		types['All'] = [];
 
 		// Get types for each category
 		for (const category of categories) {
@@ -218,7 +219,15 @@ router.get('/product-types', async (req, res) => {
 			const categoryTypes = categoryResult.rows.map((item) => item.type);
 
 			types[category] = categoryTypes;
+			types['All'] = [[...types.All, ...categoryTypes]];
 		}
+
+		// Query to get types of featured products
+		const featuredQuery = `SELECT DISTINCT type FROM products WHERE "IsFeatured" = true`;
+		const featuredResult = await client.query(featuredQuery);
+
+		// Extract featured types
+		types.Featured = featuredResult.rows.map((item) => item.type);
 
 		res.status(200).json(types);
 	} catch (error) {
