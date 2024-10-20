@@ -14,6 +14,20 @@ router.get('/users', async (req, res) => {
 	}
 });
 
+/// GET USER BY ID                                                                                                             ///
+router.get('/users/:id', async (req, res) => {
+	const id = req.params.id;
+
+	if (!id) return res.status(400).json({ message: 'ID is required!' });
+
+	try {
+		const rows = await client.query('SELECT * FROM users WHERE id = $1', [id]);
+		res.status(200).json(rows.rows[0]);
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
 /// LOGIN                                                                                                                      ///
 router.post('/login', async (req, res) => {
 	const { email, password } = req.body;
