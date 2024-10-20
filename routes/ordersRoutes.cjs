@@ -51,7 +51,7 @@ async function getProducts(orderProducts) {
 	}
 
 	// Construct the SQL query
-	const productQuery = `SELECT id, name, price, brand, category, type, image_url FROM products WHERE id = ANY($1)`;
+	const productQuery = `SELECT * FROM products WHERE id = ANY($1)`;
 
 	try {
 		// Execute the query to get product info
