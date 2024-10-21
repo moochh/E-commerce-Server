@@ -88,11 +88,13 @@ router.get('/user-products/:user_id', async (req, res) => {
 
 		// Fetch products in cart and favorites
 		const cartResult = await client.query(cartQuery, [user_id]);
-		const cartProducts = cartResult.rows.map((item) => item.product_id);
+		const cartProducts = cartResult.rows.map((item) =>
+			parseInt(item.product_id)
+		);
 
 		const favoritesResult = await client.query(favoritesQuery, [user_id]);
-		const favoriteProducts = favoritesResult.rows.map(
-			(item) => item.product_id
+		const favoriteProducts = favoritesResult.rows.map((item) =>
+			parseInt(item.product_id)
 		);
 
 		// Add is_in_cart and is_in_favorites properties to each product
@@ -103,7 +105,7 @@ router.get('/user-products/:user_id', async (req, res) => {
 		}));
 
 		// Send the enriched products back to the client
-		res.status(200).json(enrichedProducts);
+		res.status(200).json(cartProducts);
 	} catch (error) {
 		console.error('Error fetching products:', error);
 		res.status(500).json({ error: 'Internal server error' });
