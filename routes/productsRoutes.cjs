@@ -72,6 +72,42 @@ router.get('/products/:id', async (req, res) => {
 	}
 });
 
+//> Get by ID with is_in_cart & is_in_favorites
+router.get('/products/:id/:user_id', async (req, res) => {
+	const { id, user_id } = req.params;
+	const query = 'SELECT * FROM products WHERE id = $1';
+	const values = [id];
+
+	try {
+		const result = await client.query(query, values);
+
+		if (result.rows.length === 0) {
+			return res.status(404).json({ error: 'Product not found!' });
+		}
+
+		const product = result.rows[0];
+
+		// Check if product is in cart and favorites
+		const cartQuery =
+			'SELECT product_id FROM cart WHERE user_id = $1 AND product_id = $2';
+		const favoritesQuery =
+			'SELECT product_id FROM favorites WHERE user_id = $1 AND product_id = $2';
+
+		const cartResult = await client.query(cartQuery, [user_id, id]);
+		const favoritesResult = await client.query(favoritesQuery, [user_id, id]);
+
+		// Check if product is in cart
+		product.is_in_cart = cartResult.rows.length > 0;
+
+		// Check if product is in favorites
+		product.is_in_favorites = favoritesResult.rows.length > 0;
+
+		res.status(200).json(product);
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
 //> Get Products with is_in_cart & is_in_favoites
 router.get('/user-products/:user_id', async (req, res) => {
 	const { user_id } = req.params;
