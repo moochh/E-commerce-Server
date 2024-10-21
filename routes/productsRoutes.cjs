@@ -105,7 +105,7 @@ router.get('/user-products/:user_id', async (req, res) => {
 		}));
 
 		// Send the enriched products back to the client
-		res.status(200).json(cartProducts);
+		res.status(200).json(enrichedProducts);
 	} catch (error) {
 		console.error('Error fetching products:', error);
 		res.status(500).json({ error: 'Internal server error' });
