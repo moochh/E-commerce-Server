@@ -73,7 +73,7 @@ router.get('/products/:id', async (req, res) => {
 });
 
 //> Get Products with is_in_cart & is_in_favoites
-router.get('/products/:user_id', async (req, res) => {
+router.get('/user-products/:user_id', async (req, res) => {
 	const { user_id } = req.params;
 
 	// SQL queries for fetching all products and checking cart/favorites
