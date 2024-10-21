@@ -72,6 +72,44 @@ router.get('/products/:id', async (req, res) => {
 	}
 });
 
+//> Get Products with is_in_cart & is_in_favoites
+router.get('/products/:user_id', async (req, res) => {
+	const { user_id } = req.params;
+
+	// SQL queries for fetching all products and checking cart/favorites
+	const productQuery = 'SELECT * FROM products';
+	const cartQuery = 'SELECT product_id FROM cart WHERE user_id = $1';
+	const favoritesQuery = 'SELECT product_id FROM favorites WHERE user_id = $1';
+
+	try {
+		// Fetch all products
+		const productResult = await client.query(productQuery);
+		const products = productResult.rows;
+
+		// Fetch products in cart and favorites
+		const cartResult = await client.query(cartQuery, [user_id]);
+		const cartProducts = cartResult.rows.map((item) => item.product_id);
+
+		const favoritesResult = await client.query(favoritesQuery, [user_id]);
+		const favoriteProducts = favoritesResult.rows.map(
+			(item) => item.product_id
+		);
+
+		// Add is_in_cart and is_in_favorites properties to each product
+		const enrichedProducts = products.map((product) => ({
+			...product,
+			is_in_cart: cartProducts.includes(product.id), // true if product is in cart
+			is_in_favorites: favoriteProducts.includes(product.id) // true if product is in favorites
+		}));
+
+		// Send the enriched products back to the client
+		res.status(200).json(enrichedProducts);
+	} catch (error) {
+		console.error('Error fetching products:', error);
+		res.status(500).json({ error: 'Internal server error' });
+	}
+});
+
 //> Set Product Image
 router.put('/product-image', async (req, res) => {
 	const { product_id, image_url } = req.body;
