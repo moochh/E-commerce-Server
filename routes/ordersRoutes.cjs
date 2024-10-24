@@ -3,6 +3,18 @@ const router = express.Router();
 const { client } = require('../services.cjs');
 
 /// ORDERS
+//> Get all orders
+router.get('/orders', async (req, res) => {
+	const ordersQuery = `SELECT * FROM orders`;
+
+	try {
+		const orders = await client.query(ordersQuery);
+		res.status(200).json(orders.rows);
+	} catch (error) {
+		res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
+
 //> Get
 router.get('/orders/:user_id', async (req, res) => {
 	const { user_id } = req.params;
