@@ -186,18 +186,16 @@ function generateRandomUppercaseLetters(amount = 2) {
 }
 
 //> Update
-router.put('/orders/:user_id', async (req, res) => {
-	const { user_id } = req.params;
-	const { reference_number } = req.body;
+router.put('/orders/:reference_number', async (req, res) => {
+	const { reference_number } = req.params;
 
-	if (!user_id || !reference_number) {
+	if (!reference_number) {
 		return res.status(400).json({ error: 'Missing required fields!' });
 	}
 
 	try {
-		const query =
-			'UPDATE orders SET status = $3 WHERE user_id = $1 AND reference_number = $2';
-		const values = [user_id, reference_number, 'completed'];
+		const query = 'UPDATE orders SET status = $2 WHERE reference_number = $1';
+		const values = [reference_number, 'completed'];
 
 		await client.query(query, values);
 
