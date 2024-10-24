@@ -8,8 +8,12 @@ router.get('/orders', async (req, res) => {
 	const ordersQuery = `SELECT * FROM orders`;
 
 	try {
-		const orders = await client.query(ordersQuery);
-		res.status(200).json(orders.rows);
+		const ordersResult = await client.query(ordersQuery);
+		const orders = ordersResult.rows;
+
+		await processOrders(orders);
+
+		res.status(200).json(orders);
 	} catch (error) {
 		res.status(500).json({ error: 'Internal Server Error' });
 	}
