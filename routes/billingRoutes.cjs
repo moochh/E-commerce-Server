@@ -64,7 +64,7 @@ router.post('/billing/:user_id', async (req, res) => {
 	try {
 		const result = await client.query(query, values);
 
-		res.status(201).json(result.rows);
+		res.status(201).json({ message: 'Billing address added successfully!' });
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 	}
