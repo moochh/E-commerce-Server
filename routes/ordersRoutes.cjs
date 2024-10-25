@@ -116,8 +116,8 @@ router.post('/orders/:user_id', async (req, res) => {
 	try {
 		// Insert the order and retrieve the ID
 		const orderResult = await client.query(
-			'INSERT INTO orders (user_id, status) VALUES ($1, $2) RETURNING id',
-			[user_id, 'active']
+			'INSERT INTO orders (user_id, status, reference_number) VALUES ($1, $2, $3) RETURNING id',
+			[user_id, 'active', 'ref']
 		);
 
 		const orderId = orderResult.rows[0].id;
@@ -139,13 +139,11 @@ router.post('/orders/:user_id', async (req, res) => {
 			);
 		}
 
-		res
-			.status(201)
-			.json({
-				message: 'Order created successfully!',
-				id: orderId,
-				reference_number: referenceNumber
-			});
+		res.status(201).json({
+			message: 'Order created successfully!',
+			id: orderId,
+			reference_number: referenceNumber
+		});
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 		console.error(error);
