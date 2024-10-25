@@ -70,4 +70,24 @@ router.post('/billing/:user_id', async (req, res) => {
 	}
 });
 
+//> Delete
+router.delete('/billing/:user_id/:billing_id', async (req, res) => {
+	const { user_id, billing_id } = req.params;
+
+	if (!user_id || !billing_id)
+		res.status(400).json({ error: 'Missing required fields!' });
+
+	const query =
+		'DELETE FROM billing_address WHERE user_id = $1 AND billing_id = $2';
+	const values = [user_id, billing_id];
+
+	try {
+		result = await client.query(query, values);
+
+		res.status(200).json({ message: 'Billing address deleted successfully!' });
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
 module.exports = router;
