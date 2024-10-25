@@ -125,7 +125,7 @@ router.post('/orders/:user_id', async (req, res) => {
 	const values = [user_id, reference_number, 'active'];
 
 	try {
-		await client.query(query, values);
+		const orderResult = await client.query(query, values);
 
 		// Add the products to order_products table
 		for (const product of products) {
@@ -138,7 +138,7 @@ router.post('/orders/:user_id', async (req, res) => {
 
 		res
 			.status(201)
-			.json({ message: 'Order created successfully!', reference_number });
+			.json({ message: 'Order created successfully!', ...orderResult.rows[0] });
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 		console.error(error);
