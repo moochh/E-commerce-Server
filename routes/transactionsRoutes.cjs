@@ -33,4 +33,32 @@ router.get('/transactions/:payment_id', async (req, res) => {
 	}
 });
 
+//> Add
+router.post('/transactions/:user_id', async (req, res) => {
+	const { user_id } = req.params;
+	const { payment_id, reference_number, amount, payment_method } = req.body;
+
+	if (!payment_id || !reference_number || !amount || !payment_method) {
+		res.status(400).json({ error: 'Missing required fields!' });
+		return;
+	}
+
+	try {
+		const query = `INSERT INTO transactions (user_id, payment_id, reference_number, amount, payment_method) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+		const values = [
+			user_id,
+			payment_id,
+			reference_number,
+			amount,
+			payment_method
+		];
+		const result = await client.query(query, values);
+		const transaction = result.rows[0];
+
+		res.status(201).json(transaction);
+	} catch (error) {
+		res.status(500).json({ error: 'Internal Server Error' });
+	}
+});
+
 module.exports = router;
