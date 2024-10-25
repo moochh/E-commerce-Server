@@ -102,64 +102,62 @@ router.post('/orders/:user_id', async (req, res) => {
 	const { user_id } = req.params;
 	const { products } = req.body;
 
-	if (!products) res.status(400).json({ error: 'Missing required fields!' });
+	if (!products)
+		return res.status(400).json({ error: 'Missing required fields!' });
 
-	if (!Array.isArray(products)) {
-		res.status(400).json({ error: 'Invalid product data!' });
-		return;
+	if (
+		!Array.isArray(products) ||
+		products.length === 0 ||
+		!products.every((product) => product.product_id && product.quantity)
+	) {
+		return res.status(400).json({ error: 'Invalid product data!' });
 	}
-
-	if (products.length === 0) {
-		res.status(400).json({ error: 'Invalid product data!' });
-		return;
-	}
-
-	if (!products.every((product) => product.product_id && product.quantity)) {
-		res.status(400).json({ error: 'Invalid product data!' });
-	}
-
-	const reference_number = await generateOrderReferenceNumber();
-
-	const query =
-		'INSERT INTO orders (user_id, reference_number, status) VALUES ($1, $2, $3) RETURNING *';
-	const values = [user_id, reference_number, 'active'];
 
 	try {
-		const orderResult = await client.query(query, values);
+		// Insert the order and retrieve the ID
+		const orderResult = await client.query(
+			'INSERT INTO orders (user_id, status) VALUES ($1, $2) RETURNING id',
+			[user_id, 'active']
+		);
 
-		// Add the products to order_products table
+		const orderId = orderResult.rows[0].id;
+
+		// Generate the reference number using the current order ID
+		const referenceNumber = generateOrderReferenceNumber(orderId);
+
+		// Update the order with the generated reference number
+		await client.query(
+			'UPDATE orders SET reference_number = $1 WHERE id = $2',
+			[referenceNumber, orderId]
+		);
+
+		// Add products to order_products table
 		for (const product of products) {
-			const query =
-				'INSERT INTO order_products (reference_number, product_id, quantity) VALUES ($1, $2, $3)';
-			const values = [reference_number, product.product_id, product.quantity];
-
-			await client.query(query, values);
+			await client.query(
+				'INSERT INTO order_products (reference_number, product_id, quantity) VALUES ($1, $2, $3)',
+				[referenceNumber, product.product_id, product.quantity]
+			);
 		}
 
 		res
 			.status(201)
-			.json({ message: 'Order created successfully!', ...orderResult.rows[0] });
+			.json({
+				message: 'Order created successfully!',
+				id: orderId,
+				reference_number: referenceNumber
+			});
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 		console.error(error);
 	}
 });
 
-async function generateOrderReferenceNumber() {
+function generateOrderReferenceNumber(orderId) {
 	const prefix = 'ORD';
 	const suffix = generateRandomUppercaseLetters();
+	const paddedId = addZeroPadding(orderId);
 
-	const query = "SELECT nextval('orders_id_seq')";
-
-	try {
-		const result = await client.query(query);
-		const nextval = addZeroPadding(result.rows[0].nextval);
-
-		return `${prefix}${nextval}${suffix}`;
-	} catch (error) {
-		console.error('Error generating order reference number:', error);
-		throw new Error('Unable to generate order reference number');
-	}
+	return `${prefix}${paddedId}${suffix}`;
 }
 
 function addZeroPadding(number, totalDigits = 6) {
