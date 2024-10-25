@@ -77,8 +77,7 @@ router.delete('/billing/:user_id/:billing_id', async (req, res) => {
 	if (!user_id || !billing_id)
 		res.status(400).json({ error: 'Missing required fields!' });
 
-	const query =
-		'DELETE FROM billing_address WHERE user_id = $1 AND billing_id = $2';
+	const query = 'DELETE FROM billing_address WHERE user_id = $1 AND id = $2';
 	const values = [user_id, billing_id];
 
 	try {
