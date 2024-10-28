@@ -393,28 +393,13 @@ router.patch('/products/:id', async (req, res) => {
 	}
 });
 
-//! HARD DELETE
-router.delete('/hard-delete/:product_id', async (req, res) => {
-	const { product_id } = req.params;
-	const deleteValues = [product_id];
-
-	try {
-		// Delete from products table
-		const query = `DELETE FROM products WHERE id = $1`;
-		await client.query(query, deleteValues);
-
-		res.status(200).json({ message: 'Product deleted!' });
-	} catch (error) {
-		res.status(500).json({ error: error.stack });
-	}
-});
-
 //! DELETE ALL
 router.delete('/delete-all/:product_id', async (req, res) => {
 	const { product_id } = req.params;
 	const deleteValues = [product_id];
 
 	// Delete from tables cart, favorites, order_products
+	const productsQuery = `DELETE FROM products WHERE id = $1`;
 	const cartQuery = `DELETE FROM cart WHERE product_id = $1`;
 	const favoritesQuery = `DELETE FROM favorites WHERE product_id = $1`;
 	const orderProductsQuery = `DELETE FROM order_products WHERE product_id = $1`;
@@ -423,6 +408,7 @@ router.delete('/delete-all/:product_id', async (req, res) => {
 		await client.query(cartQuery, deleteValues);
 		await client.query(favoritesQuery, deleteValues);
 		await client.query(orderProductsQuery, deleteValues);
+		await client.query(productsQuery, deleteValues);
 
 		res.status(200).json({ message: 'Product deleted!' });
 	} catch (error) {
