@@ -10,4 +10,8 @@ router.get('/abc', (req, res) => {
 	res.send('Hello ABC');
 });
 
+router.get('/xyz', (req, res) => {
+	res.send('Hello XYZ');
+});
+
 module.exports = router;

@@ -228,6 +228,8 @@ router.post('/products', async (req, res) => {
 		const result = await client.query(query, values);
 		const newProductId = result.rows[0].id;
 
+		console.log(typeof newProductId);
+
 		res
 			.status(201)
 			.json({ message: 'Product created!', product_id: newProductId });
@@ -259,7 +261,7 @@ async function uploadImage(image, id) {
 //> Delete by ID
 router.delete('/products/:id', async (req, res) => {
 	const { id } = req.params;
-	const query = 'DELETE FROM products WHERE id = $1';
+	const query = 'UPDATE products SET is_visible = false WHERE id = $1';
 	const values = [id];
 
 	try {
@@ -305,6 +307,87 @@ router.get('/product-types', async (req, res) => {
 		types.Featured = featuredResult.rows.map((item) => item.type);
 
 		res.status(200).json(types);
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
+//> Update Product
+router.patch('/products/:id', async (req, res) => {
+	const { id } = req.params;
+	const {
+		name,
+		short_description,
+		long_description,
+		category,
+		price,
+		stock_quantity,
+		brand,
+		dimensions,
+		type,
+		is_featured
+	} = req.body;
+
+	// Build the dynamic query
+	let query = 'UPDATE products SET ';
+	const values = [];
+	let setClause = [];
+
+	if (name) {
+		values.push(name);
+		setClause.push(`name = $${values.length}`);
+	}
+	if (short_description) {
+		values.push(short_description);
+		setClause.push(`short_description = $${values.length}`);
+	}
+	if (long_description) {
+		values.push(long_description);
+		setClause.push(`long_description = $${values.length}`);
+	}
+	if (category) {
+		values.push(category);
+		setClause.push(`category = $${values.length}`);
+	}
+	if (price) {
+		values.push(price);
+		setClause.push(`price = $${values.length}`);
+	}
+	if (stock_quantity !== undefined) {
+		values.push(stock_quantity);
+		setClause.push(`stock_quantity = $${values.length}`);
+	}
+	if (brand) {
+		values.push(brand);
+		setClause.push(`brand = $${values.length}`);
+	}
+	if (dimensions) {
+		values.push(dimensions);
+		setClause.push(`dimensions = $${values.length}`);
+	}
+	if (type) {
+		values.push(type);
+		setClause.push(`type = $${values.length}`);
+	}
+	if (is_featured !== undefined) {
+		values.push(is_featured);
+		setClause.push(`is_featured = $${values.length}`);
+	}
+
+	if (setClause.length === 0) {
+		return res.status(400).json({ error: 'No fields to update' });
+	}
+
+	query += setClause.join(', ');
+	query += ` WHERE id = $${values.length + 1} RETURNING *`;
+	values.push(id);
+
+	try {
+		const result = await client.query(query, values);
+		if (result.rows.length === 0) {
+			return res.status(404).json({ error: 'Product not found' });
+		}
+		res.status(200).json(result.rows[0]);
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 	}
