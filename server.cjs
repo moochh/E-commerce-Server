@@ -17,6 +17,7 @@ const ordersRoutes = require('./routes/ordersRoutes.cjs');
 const billingRoutes = require('./routes/billingRoutes.cjs');
 const featuredRoutes = require('./routes/featuredRoutes.cjs');
 const transactionsRoutes = require('./routes/transactionsRoutes.cjs');
+const adminRoutes = require('./routes/adminRoutes.cjs');
 
 /// SETUP                                                                                                                      ///
 app.use(cors());
@@ -33,6 +34,7 @@ app.use('/', ordersRoutes);
 app.use('/', billingRoutes);
 app.use('/', featuredRoutes);
 app.use('/', transactionsRoutes);
+app.use('/', adminRoutes);
 
 /// RUN                                                                                                                        ///
 app.get('/', (req, res) => {

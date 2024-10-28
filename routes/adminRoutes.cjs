@@ -32,3 +32,5 @@ router.post('/admin-login', async (req, res) => {
 	if (admin) return res.status(200).json({ message: 'Login successful!' });
 	else return res.status(401).json({ error: 'Invalid email or password' });
 });
+
+module.exports = router;
