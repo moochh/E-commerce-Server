@@ -17,9 +17,9 @@ const adminAccounts = [
 	}
 ];
 
-/// ADMIN
+/// ADMIN                                                                                                                       ///
 //> Login
-router.post('/login', async (req, res) => {
+router.post('/admin-login', async (req, res) => {
 	const { email, password } = req.body;
 
 	if (!email || !password)
