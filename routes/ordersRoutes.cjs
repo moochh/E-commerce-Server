@@ -32,7 +32,7 @@ router.get('/orders/:user_id', async (req, res) => {
 		const ordersResult = await client.query(ordersQuery, ordersValues);
 		const orders = ordersResult.rows;
 
-		await processOrders(orders);
+		await processAllOrders(orders);
 
 		res.json(orders);
 	} catch (error) {
@@ -40,6 +40,29 @@ router.get('/orders/:user_id', async (req, res) => {
 		console.error(error);
 	}
 });
+
+async function processAllOrders(orders) {
+	const orderProductsQuery = 'SELECT * from order_products';
+	const productsQuery = 'SELECT * from products';
+
+	const orderProducts = await client.query(orderProductsQuery);
+	const products = await client.query(productsQuery);
+
+	for (const order of orders) {
+		const orderProductsResult = orderProducts.rows.filter(
+			(product) => product.reference_number === order.reference_number
+		);
+		const orderProductsValues = orderProductsResult.map(
+			(product) => product.id
+		);
+
+		const productsResult = products.rows.filter((product) =>
+			orderProductsValues.includes(product.id)
+		);
+
+		order.products = productsResult;
+	}
+}
 
 async function processOrders(orders) {
 	for (const order of orders) {
