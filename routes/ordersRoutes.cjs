@@ -11,7 +11,7 @@ router.get('/orders', async (req, res) => {
 		const ordersResult = await client.query(ordersQuery);
 		const orders = ordersResult.rows;
 
-		await processOrders(orders);
+		await processAllOrders(orders);
 
 		res.status(200).json(orders);
 	} catch (error) {
@@ -32,7 +32,7 @@ router.get('/orders/:user_id', async (req, res) => {
 		const ordersResult = await client.query(ordersQuery, ordersValues);
 		const orders = ordersResult.rows;
 
-		await processAllOrders(orders);
+		await processOrders(orders);
 
 		res.json(orders);
 	} catch (error) {
