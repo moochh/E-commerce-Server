@@ -34,7 +34,7 @@ router.get('/billing/:user_id/:billing_id', async (req, res) => {
 	try {
 		const result = await client.query(query, values);
 
-		res.status(200).json(result.rows);
+		res.status(200).json(result.rows[0]);
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
 	}
