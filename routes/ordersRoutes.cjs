@@ -42,25 +42,54 @@ router.get('/orders/:user_id', async (req, res) => {
 });
 
 async function processAllOrders(orders) {
-	const orderProductsQuery = 'SELECT * from order_products';
-	const productsQuery = 'SELECT * from products';
+	if (orders.length === 0) return;
 
-	const orderProducts = await client.query(orderProductsQuery);
-	const products = await client.query(productsQuery);
+	// Get all reference numbers
+	const referenceNumbers = orders.map((order) => order.reference_number);
 
+	// Get all order products in one query
+	const orderProductsQuery = `
+		SELECT reference_number, product_id, quantity 
+		FROM order_products 
+		WHERE reference_number = ANY($1)
+	`;
+	const orderProductsResult = await client.query(orderProductsQuery, [
+		referenceNumbers
+	]);
+	const allOrderProducts = orderProductsResult.rows;
+
+	// Group order products by reference number
+	const orderProductsMap = allOrderProducts.reduce((acc, item) => {
+		if (!acc[item.reference_number]) {
+			acc[item.reference_number] = [];
+		}
+		acc[item.reference_number].push(item);
+		return acc;
+	}, {});
+
+	// Get all unique product IDs
+	const productIds = [
+		...new Set(allOrderProducts.map((item) => item.product_id))
+	];
+
+	// Get all products info in one query
+	const productsQuery = `SELECT * FROM products WHERE id = ANY($1)`;
+	const productsResult = await client.query(productsQuery, [productIds]);
+	const products = productsResult.rows;
+
+	// Create products lookup map
+	const productsMap = products.reduce((acc, product) => {
+		acc[product.id] = product;
+		return acc;
+	}, {});
+
+	// Combine all information
 	for (const order of orders) {
-		const orderProductsResult = orderProducts.rows.filter(
-			(product) => product.reference_number === order.reference_number
-		);
-		const orderProductsValues = orderProductsResult.map((product) =>
-			parseInt(product.id)
-		);
-
-		const productsResult = products.rows.filter((product) =>
-			orderProductsValues.includes(product.id)
-		);
-
-		order.products = productsResult;
+		const orderProducts = orderProductsMap[order.reference_number] || [];
+		order.products = orderProducts.map((item) => ({
+			...productsMap[item.product_id],
+			quantity: item.quantity
+		}));
 	}
 }
 
