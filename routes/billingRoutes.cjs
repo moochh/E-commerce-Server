@@ -21,6 +21,25 @@ router.get('/billing/:user_id', async (req, res) => {
 	}
 });
 
+//> Get individual billing address
+router.get('/billing/:user_id/:billing_id', async (req, res) => {
+	const { user_id, billing_id } = req.params;
+
+	if (!user_id || !billing_id)
+		res.status(400).json({ error: 'Missing required fields!' });
+
+	const query = 'SELECT * from billing_address where user_id = $1 and id = $2';
+	const values = [user_id, billing_id];
+
+	try {
+		const result = await client.query(query, values);
+
+		res.status(200).json(result.rows);
+	} catch (error) {
+		res.status(500).json({ error: error.stack });
+	}
+});
+
 //> Add
 router.post('/billing/:user_id', async (req, res) => {
 	const { user_id } = req.params;
