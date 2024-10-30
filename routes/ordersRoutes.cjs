@@ -52,8 +52,8 @@ async function processAllOrders(orders) {
 		const orderProductsResult = orderProducts.rows.filter(
 			(product) => product.reference_number === order.reference_number
 		);
-		const orderProductsValues = orderProductsResult.map(
-			(product) => product.id
+		const orderProductsValues = orderProductsResult.map((product) =>
+			parseInt(product.id)
 		);
 
 		const productsResult = products.rows.filter((product) =>
