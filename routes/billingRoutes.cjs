@@ -125,7 +125,7 @@ router.put('/billing/:user_id/:billing_id', async (req, res) => {
 		address_line_1,
 		address_line_2,
 		city,
-		postal_code,u
+		postal_code,
 		user_id,
 		billing_id
 	];
