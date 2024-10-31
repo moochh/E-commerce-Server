@@ -42,7 +42,6 @@ const upload = multer({ storage: multerStorage });
 
 /// PRODUCTS                                                                                                                   ///
 router.get('/products', async (req, res) => {
-	// Sort by id in ascending order and return only visible products
 	const query =
 		'SELECT * FROM products WHERE is_visible = true ORDER BY id ASC';
 
