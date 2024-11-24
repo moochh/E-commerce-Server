@@ -6,7 +6,7 @@ const { client } = require('../services.cjs');
 //> Update product image
 router.post('/update-product-image/:id', async (req, res) => {
 	const { id } = req.params;
-	const { image } = req.query;
+	const { image } = req.body;
 
 	if (!id || !image)
 		res.status(400).json({ error: 'Missing required fields!' });
