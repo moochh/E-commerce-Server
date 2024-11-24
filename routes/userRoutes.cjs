@@ -95,6 +95,7 @@ router.post('/register', async (req, res) => {
 	}
 });
 
+//! DELETE USER                                                                                                                ///
 router.delete('/users/:email', async (req, res) => {
 	const email = req.params.email;
 
