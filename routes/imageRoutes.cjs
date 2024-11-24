@@ -16,14 +16,14 @@ router.post('/update-product-image/:id', async (req, res) => {
 			`UPDATE products SET image_url = $1 WHERE id = $2`,
 			[image, id]
 		);
+
+		if (product.rowCount > 0)
+			return res.status(200).json({ message: 'Product image updated!' });
+		else return res.status(404).json({ error: 'Product not found!' });
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ error: 'Internal server error!' });
 	}
-
-	if (product.rowCount > 0)
-		return res.status(200).json({ message: 'Product image updated!' });
-	else return res.status(404).json({ error: 'Product not found!' });
 });
 
 module.exports = router;
