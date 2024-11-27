@@ -86,7 +86,21 @@ router.get('/products/:id/:user_id', async (req, res) => {
 			return res.status(404).json({ error: 'Product not found!' });
 		}
 
+		// Get ratings of the product
+		const query2 = 'SELECT rating FROM reviews WHERE product_id = $1';
+		const values2 = [id];
+		const result2 = await client.query(query2, values2);
+
+		const ratings = result2.rows.map((row) => row.rating);
+		const averageRating = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+
 		const product = result.rows[0];
+
+		if (isNaN(averageRating)) {
+			product.average_rating = 0;
+		} else {
+			product.average_rating = averageRating;
+		}
 
 		// Check if product is in cart and favorites
 		const cartQuery =
@@ -117,11 +131,30 @@ router.get('/user-products/:user_id', async (req, res) => {
 	const productQuery = 'SELECT * FROM products';
 	const cartQuery = 'SELECT product_id FROM cart WHERE user_id = $1';
 	const favoritesQuery = 'SELECT product_id FROM favorites WHERE user_id = $1';
+	const ratingsQuery = 'SELECT product_id, rating from reviews';
 
 	try {
 		// Fetch all products
 		const productResult = await client.query(productQuery);
 		const products = productResult.rows;
+
+		// Get product ratings
+		const ratingsResult = await client.query(ratingsQuery);
+
+		// Get the average rating for each product in ratingsResult
+		const averageRatings = calculateAverageRatings(ratingsResult.rows);
+
+		// Put the ratings to the products (put 0 if no rating)
+		products.forEach((product) => {
+			const rating = averageRatings.find(
+				(ratingObj) => ratingObj.product_id === product.id
+			);
+			if (rating) {
+				product.average_rating = rating.rating;
+			} else {
+				product.rating = 0;
+			}
+		});
 
 		// Fetch products in cart and favorites
 		const cartResult = await client.query(cartQuery, [user_id]);
@@ -148,6 +181,34 @@ router.get('/user-products/:user_id', async (req, res) => {
 		res.status(500).json({ error: 'Internal server error' });
 	}
 });
+
+function calculateAverageRatings(ratings) {
+	// Create an object to hold the sum of ratings and count for each product_id
+	const productRatings = {};
+
+	// Loop through the ratings array
+	for (const ratingObj of ratings) {
+		const { product_id, rating } = ratingObj;
+
+		// Initialize the product if it doesn't exist in the object
+		if (!productRatings[product_id]) {
+			productRatings[product_id] = { sum: 0, count: 0 };
+		}
+
+		// Add the current rating to the sum and increment the count
+		productRatings[product_id].sum += rating;
+		productRatings[product_id].count += 1;
+	}
+
+	// Create the result array with the average rating for each product
+	const result = Object.keys(productRatings).map((product_id) => {
+		const { sum, count } = productRatings[product_id];
+		const average = sum / count;
+		return { product_id: Number(product_id), rating: average };
+	});
+
+	return result;
+}
 
 //> Set Product Image
 router.put('/product-image', async (req, res) => {
@@ -228,8 +289,6 @@ router.post('/products', async (req, res) => {
 
 		const result = await client.query(query, values);
 		const newProductId = result.rows[0].id;
-
-		console.log(typeof newProductId);
 
 		res
 			.status(201)

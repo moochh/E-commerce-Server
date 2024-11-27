@@ -19,6 +19,7 @@ const featuredRoutes = require('./routes/featuredRoutes.cjs');
 const transactionsRoutes = require('./routes/transactionsRoutes.cjs');
 const adminRoutes = require('./routes/adminRoutes.cjs');
 const imageRoutes = require('./routes/imageRoutes.cjs');
+const reviewsRoutes = require('./routes/reviewsRoutes.cjs');
 
 /// SETUP                                                                                                                      ///
 app.use(cors());
@@ -37,6 +38,7 @@ app.use('/', featuredRoutes);
 app.use('/', transactionsRoutes);
 app.use('/', adminRoutes);
 app.use('/', imageRoutes);
+app.use('/', reviewsRoutes);
 
 /// RUN                                                                                                                        ///
 app.get('/', (req, res) => {
