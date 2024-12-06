@@ -194,8 +194,7 @@ router.post('/orders/:user_id', async (req, res) => {
 		res.status(201).json({
 			message: 'Order created successfully!',
 			id: orderId,
-			reference_number: referenceNumber,
-			date: orderResult.rows[0].date
+			reference_number: referenceNumber
 		});
 	} catch (error) {
 		res.status(500).json({ error: error.stack });
