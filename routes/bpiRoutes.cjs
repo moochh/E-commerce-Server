@@ -147,16 +147,16 @@ router.get("/bpi/orders", async (req, res) => {
 // Get order by ID
 router.get("/bpi/orders/:id", async (req, res) => {
   const { id } = req.params;
-  const order = await client.query("SELECT * FROM bpi_orders WHERE id = $1", [
+  const result = await client.query("SELECT * FROM bpi_orders WHERE id = $1", [
     id,
   ]);
 
-  if (!order) {
+  if (result.rows.length === 0) {
     return res.status(404).json({ error: "Order not found" });
   }
 
   setTimeout(() => {
-    res.status(200).json(order);
+    res.status(200).json(result.rows[0]);
   }, 3000);
 });
 
