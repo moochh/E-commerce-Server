@@ -80,7 +80,9 @@ const merchants = [
 
 // Get all merchants
 router.get("/bpi/merchants", async (req, res) => {
-  res.status(200).json(merchants);
+  setTimeout(() => {
+    res.status(200).json(merchants);
+  }, 3000);
 });
 
 // Get merchant by name
@@ -94,7 +96,9 @@ router.get("/bpi/merchants/:name", async (req, res) => {
     return res.status(404).json({ error: "Merchant not found" });
   }
 
-  res.status(200).json(merchant);
+  setTimeout(() => {
+    res.status(200).json(merchant);
+  }, 3000);
 });
 
 /// ORDERS
@@ -144,7 +148,9 @@ router.get("/bpi/orders/:id", async (req, res) => {
     return res.status(404).json({ error: "Order not found" });
   }
 
-  res.status(200).json(order);
+  setTimeout(() => {
+    res.status(200).json(order);
+  }, 3000);
 });
 
 // Add order
@@ -167,7 +173,9 @@ router.post("/bpi/orders", async (req, res) => {
 
   orders.push(order);
 
-  res.status(201).json(order);
+  setTimeout(() => {
+    res.status(201).json(order);
+  }, 3000);
 });
 
 function generateOrderId() {
