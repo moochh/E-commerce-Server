@@ -143,4 +143,40 @@ router.get("/bpi/orders/:id", async (req, res) => {
   res.status(200).json(order);
 });
 
+// Add order
+router.post("/bpi/orders", async (req, res) => {
+  const { merchant, credits, quantity, amount, date, status } = req.body;
+
+  if (!merchant || !credits || !quantity || !amount) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const order = {
+    id: generateOrderId(),
+    merchant,
+    credits,
+    quantity,
+    amount,
+    date: generateOrderDate(),
+    status: "Unredeemed",
+  };
+
+  orders.push(order);
+
+  res.status(201).json(order);
+});
+
+function generateOrderId() {
+  const orderId = crypto
+    .randomUUID()
+    .toUpperCase()
+    .replaceAll("-", "")
+    .slice(0, 8);
+  return orderId;
+}
+
+function generateOrderDate() {
+  return new Date().toISOString().split("T")[0];
+}
+
 module.exports = router;
