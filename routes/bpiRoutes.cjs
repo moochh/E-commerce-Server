@@ -102,41 +102,46 @@ router.get("/bpi/merchants/:name", async (req, res) => {
 });
 
 /// ORDERS
-const orders = [
-  {
-    id: "ABCD1234",
-    merchant: "SM Gift Pass",
-    credits: 500,
-    quantity: 5,
-    amount: 2500,
-    date: "2025-02-15",
-    status: "Unredeemed",
-  },
-  {
-    id: "E5F6G7H8",
-    merchant: "Jollibee",
-    credits: 200,
-    quantity: 2,
-    amount: 400,
-    date: "2025-02-20",
-    status: "Unredeemed",
-  },
-  {
-    id: "I9J0K1L2",
-    merchant: "Power Mac Center",
-    credits: 5000,
-    quantity: 1,
-    amount: 5000,
-    date: "2025-02-25",
-    status: "Unredeemed",
-  },
-];
+// const orders = [
+//   {
+//     id: "ABCD1234",
+//     merchant: "SM Gift Pass",
+//     credits: 500,
+//     quantity: 5,
+//     amount: 2500,
+//     date: "2025-02-15",
+//     status: "Unredeemed",
+//   },
+//   {
+//     id: "E5F6G7H8",
+//     merchant: "Jollibee",
+//     credits: 200,
+//     quantity: 2,
+//     amount: 400,
+//     date: "2025-02-20",
+//     status: "Unredeemed",
+//   },
+//   {
+//     id: "I9J0K1L2",
+//     merchant: "Power Mac Center",
+//     credits: 5000,
+//     quantity: 1,
+//     amount: 5000,
+//     date: "2025-02-25",
+//     status: "Unredeemed",
+//   },
+// ];
 
 // Get all orders
 router.get("/bpi/orders", async (req, res) => {
-  setTimeout(() => {
-    res.status(200).json(orders);
-  }, 3000);
+  try {
+    const orders = await client.query("SELECT * FROM bpi_orders");
+    setTimeout(() => {
+      res.status(200).json(orders);
+    }, 3000);
+  } catch (error) {
+    res.status(500).json({ error: error.stack });
+  }
 });
 
 // Get order by ID
