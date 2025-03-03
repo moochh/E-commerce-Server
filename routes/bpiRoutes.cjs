@@ -137,7 +137,7 @@ router.get("/bpi/orders", async (req, res) => {
   try {
     const orders = await client.query("SELECT * FROM bpi_orders");
     setTimeout(() => {
-      res.status(200).json(orders);
+      res.status(200).json(orders.rows);
     }, 3000);
   } catch (error) {
     res.status(500).json({ error: error.stack });
