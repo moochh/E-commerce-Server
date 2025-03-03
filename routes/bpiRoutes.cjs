@@ -83,10 +83,12 @@ router.get("/bpi/merchants", async (req, res) => {
   res.status(200).json(merchants);
 });
 
-// Get merchant by ID
-router.get("/bpi/merchants/:id", async (req, res) => {
-  const { id } = req.params;
-  const merchant = merchants.find((merchant) => merchant.id === id);
+// Get merchant by name
+router.get("/bpi/merchants/:name", async (req, res) => {
+  const { name } = req.params;
+  const merchant = merchants.find(
+    (merchant) => merchant.name.toLowerCase().replaceAll(" ", "-") === name,
+  );
 
   if (!merchant) {
     return res.status(404).json({ error: "Merchant not found" });
