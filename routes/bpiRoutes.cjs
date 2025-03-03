@@ -147,7 +147,9 @@ router.get("/bpi/orders", async (req, res) => {
 // Get order by ID
 router.get("/bpi/orders/:id", async (req, res) => {
   const { id } = req.params;
-  const order = orders.find((order) => order.id === id);
+  const order = await client.query("SELECT * FROM bpi_orders WHERE id = $1", [
+    id,
+  ]);
 
   if (!order) {
     return res.status(404).json({ error: "Order not found" });
@@ -176,11 +178,27 @@ router.post("/bpi/orders", async (req, res) => {
     status: "Unredeemed",
   };
 
-  orders.push(order);
+  const query = `INSERT INTO bpi_orders (id, merchant, credits, quantity, amount, date, status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
+  const values = [
+    order.id,
+    order.merchant,
+    order.credits,
+    order.quantity,
+    order.amount,
+    order.date,
+    order.status,
+  ];
 
-  setTimeout(() => {
-    res.status(201).json(order);
-  }, 3000);
+  try {
+    const result = await client.query(query, values);
+    const newOrder = result.rows[0];
+
+    setTimeout(() => {
+      res.status(201).json(newOrder);
+    }, 3000);
+  } catch (error) {
+    res.status(500).json({ error: error.stack });
+  }
 });
 
 function generateOrderId() {
