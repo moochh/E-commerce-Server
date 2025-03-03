@@ -130,7 +130,9 @@ const orders = [
 
 // Get all orders
 router.get("/bpi/orders", async (req, res) => {
-  res.status(200).json(orders);
+  setTimeout(() => {
+    res.status(200).json(orders);
+  }, 3000);
 });
 
 // Get order by ID
