@@ -213,7 +213,7 @@ router.get("/bpi/orders/:user_id", async (req, res) => {
 });
 
 // Get order by ID
-router.get("/bpi/orders/:id", async (req, res) => {
+router.get("/bpi/order/:id", async (req, res) => {
   const { id } = req.params;
   const result = await client.query("SELECT * FROM bpi_orders WHERE id = $1", [
     id,
