@@ -188,19 +188,25 @@ router.get("/bpi/merchants/:name", async (req, res) => {
     return res.status(404).json({ error: "Merchant not found" });
   }
 
-  setTimeout(() => {
-    res.status(200).json(merchant);
-  }, 3000);
+  res.status(200).json(merchant);
 });
 
 /// ORDERS
 // Get all orders
-router.get("/bpi/orders", async (req, res) => {
+router.get("/bpi/orders/:user_id", async (req, res) => {
+  const { user_id } = req.params;
+
+  if (!user_id) {
+    return res.status(400).json({ error: "Missing required fields!" });
+  }
+
   try {
-    const orders = await client.query("SELECT * FROM bpi_orders");
-    setTimeout(() => {
-      res.status(200).json(orders.rows);
-    }, 3000);
+    const orders = await client.query(
+      "SELECT * FROM bpi_orders WHERE user_id = $1",
+      [user_id],
+    );
+
+    res.status(200).json(orders.rows);
   } catch (error) {
     res.status(500).json({ error: error.stack });
   }
@@ -217,16 +223,15 @@ router.get("/bpi/orders/:id", async (req, res) => {
     return res.status(404).json({ error: "Order not found" });
   }
 
-  setTimeout(() => {
-    res.status(200).json(result.rows[0]);
-  }, 3000);
+  res.status(200).json(result.rows[0]);
 });
 
 // Add order
 router.post("/bpi/orders", async (req, res) => {
-  const { merchant, credits, quantity, amount, date, status } = req.body;
+  const { merchant, credits, quantity, amount, date, status, user_id } =
+    req.body;
 
-  if (!merchant || !credits || !quantity || !amount) {
+  if (!merchant || !credits || !quantity || !amount || !user_id) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -238,9 +243,10 @@ router.post("/bpi/orders", async (req, res) => {
     amount,
     date: generateOrderDate(),
     status: "Unredeemed",
+    user_id,
   };
 
-  const query = `INSERT INTO bpi_orders (id, merchant, credits, quantity, amount, date, status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`;
+  const query = `INSERT INTO bpi_orders (id, merchant, credits, quantity, amount, date, status, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`;
   const values = [
     order.id,
     order.merchant,
@@ -249,15 +255,14 @@ router.post("/bpi/orders", async (req, res) => {
     order.amount,
     order.date,
     order.status,
+    order.user_id,
   ];
 
   try {
     const result = await client.query(query, values);
     const newOrder = result.rows[0];
 
-    setTimeout(() => {
-      res.status(201).json(newOrder);
-    }, 3000);
+    res.status(201).json(newOrder);
   } catch (error) {
     res.status(500).json({ error: error.stack });
   }
