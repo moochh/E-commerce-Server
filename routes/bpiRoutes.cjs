@@ -53,7 +53,7 @@ router.post("/bpi/login", async (req, res) => {
     return res.status(400).json({ error: "Missing required fields!" });
   }
 
-  const query = "SELECT * FROM users WHERE referral_code = $1";
+  const query = "SELECT * FROM bpi_users WHERE referral_code = $1";
   const values = [referral_code];
 
   try {
