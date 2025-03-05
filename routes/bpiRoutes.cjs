@@ -70,6 +70,30 @@ router.post("/bpi/login", async (req, res) => {
   }
 });
 
+router.get("/bpi/user/:id", async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ error: "Missing required fields!" });
+  }
+
+  const query = "SELECT * FROM bpi_users WHERE id = $1";
+  const values = [id];
+
+  try {
+    const result = await client.query(query, values);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(400).json({ error: "Invalid user id!" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.stack });
+  }
+});
+
 /// CATALOG
 const merchants = [
   {
