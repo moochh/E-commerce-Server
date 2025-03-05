@@ -262,6 +262,17 @@ router.post("/bpi/orders", async (req, res) => {
     const result = await client.query(query, values);
     const newOrder = result.rows[0];
 
+    const user = await client.query("SELECT * FROM bpi_users WHERE id = $1", [
+      order.user_id,
+    ]);
+
+    // Deduct credits from user
+    const credits = user.rows[0].credits - order.credits;
+    const query2 = `UPDATE bpi_users SET credits = $1 WHERE id = $2`;
+    const values2 = [credits, order.user_id];
+
+    await client.query(query2, values2);
+
     res.status(201).json(newOrder);
   } catch (error) {
     res.status(500).json({ error: error.stack });
