@@ -246,7 +246,7 @@ router.post("/bpi/orders", async (req, res) => {
     user_id,
   };
 
-  const query = `INSERT INTO bpi_orders (id, merchant, credits, quantity, amount, date, status, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`;
+  const query = `INSERT INTO bpi_orders (id, merchant, credits, quantity, amount, date, status, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`;
   const values = [
     order.id,
     order.merchant,
