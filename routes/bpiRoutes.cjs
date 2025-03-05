@@ -172,9 +172,7 @@ const merchants = [
 
 // Get all merchants
 router.get("/bpi/merchants", async (req, res) => {
-  setTimeout(() => {
-    res.status(200).json(merchants);
-  }, 3000);
+  res.status(200).json(merchants);
 });
 
 // Get merchant by name
