@@ -2,6 +2,50 @@ const express = require("express");
 const router = express.Router();
 const { client } = require("../services.cjs");
 
+/// USERS
+router.post("/bpi/check-number", async (req, res) => {
+  const { mobile_number } = req.body;
+
+  if (!mobile_number) {
+    return res.status(400).json({ error: "Missing mobile number" });
+  }
+
+  const query = `SELECT * FROM bpi_users WHERE mobile_number = $1`;
+  const values = [mobile_number];
+
+  try {
+    const result = await client.query(query, values);
+
+    if (result.rows.length > 0) {
+      return res.status(400).json({ error: "Mobile number already exists" });
+    }
+
+    res.status(200).json({ message: "Mobile number available" });
+  } catch (error) {
+    res.status(500).json({ error: error.stack });
+  }
+});
+
+router.post("/bpi/register", async (req, res) => {
+  const { mobile_number, name, referral_code } = req.body;
+
+  if (!mobile_number || !name || !referral_code) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const query = `INSERT INTO bpi_users (mobile_number, name, referral_code) VALUES ($1, $2, $3) RETURNING *`;
+  const values = [mobile_number, name, referral_code];
+
+  try {
+    const result = await client.query(query, values);
+    const newUser = result.rows[0];
+
+    res.status(201).json(newUser);
+  } catch (error) {
+    res.status(500).json({ error: error.stack });
+  }
+});
+
 /// CATALOG
 const merchants = [
   {
@@ -102,36 +146,6 @@ router.get("/bpi/merchants/:name", async (req, res) => {
 });
 
 /// ORDERS
-// const orders = [
-//   {
-//     id: "ABCD1234",
-//     merchant: "SM Gift Pass",
-//     credits: 500,
-//     quantity: 5,
-//     amount: 2500,
-//     date: "2025-02-15",
-//     status: "Unredeemed",
-//   },
-//   {
-//     id: "E5F6G7H8",
-//     merchant: "Jollibee",
-//     credits: 200,
-//     quantity: 2,
-//     amount: 400,
-//     date: "2025-02-20",
-//     status: "Unredeemed",
-//   },
-//   {
-//     id: "I9J0K1L2",
-//     merchant: "Power Mac Center",
-//     credits: 5000,
-//     quantity: 1,
-//     amount: 5000,
-//     date: "2025-02-25",
-//     status: "Unredeemed",
-//   },
-// ];
-
 // Get all orders
 router.get("/bpi/orders", async (req, res) => {
   try {
