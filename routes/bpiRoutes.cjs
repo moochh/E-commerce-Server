@@ -46,6 +46,30 @@ router.post("/bpi/register", async (req, res) => {
   }
 });
 
+router.post("/bpi/login", async (req, res) => {
+  const { referral_code } = req.body;
+
+  if (!referral_code) {
+    return res.status(400).json({ error: "Missing required fields!" });
+  }
+
+  const query = "SELECT * FROM users WHERE referral_code = $1";
+  const values = [referral_code];
+
+  try {
+    const result = await client.query(query, values);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(400).json({ error: "Invalid referral code!" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.stack });
+  }
+});
+
 /// CATALOG
 const merchants = [
   {
