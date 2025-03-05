@@ -70,7 +70,7 @@ router.post("/bpi/login", async (req, res) => {
   }
 });
 
-router.get("/bpi/user/:id", async (req, res) => {
+router.get("/bpi/users/:id", async (req, res) => {
   const { id } = req.params;
 
   if (!id) {
